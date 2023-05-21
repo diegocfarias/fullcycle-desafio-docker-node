@@ -1,0 +1,47 @@
+version: '3.6'
+
+services:
+  node:
+    build:
+      context: ./node
+      dockerfile: Dockerfile
+    image: diegocfarias/fullcycle:node
+    container_name: node
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 20s node index.js
+    networks:
+      - minharede
+    depends_on:
+      - db
+  
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: diegocfarias/fullcycle:node-nginx
+    container_name: nginx
+    ports:
+      - "8080:80"
+    networks:
+      - minharede
+    depends_on:
+      - node
+  
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    command: --innodb-use-native-aio=0
+    restart: always
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=nodedb
+    networks:
+      - minharede
+    ports:
+      - "3306:3306"
+
+networks:
+  minharede:
+    driver: bridge
