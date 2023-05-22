@@ -6,8 +6,10 @@ services:
       context: ./node
       dockerfile: Dockerfile
     image: diegocfarias/fullcycle:node
+    volumes:
+      - ./node:/usr/src/app
     container_name: node
-    entrypoint: dockerize -wait tcp://db:3306 -timeout 20s node index.js
+    entrypoint: sh -c "dockerize -wait tcp://db:3306 -timeout 20s && npm install && node --watch index.js"
     networks:
       - minharede
     depends_on:
